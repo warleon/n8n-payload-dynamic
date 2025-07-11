@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-payload-dynamic",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Dynamic n8n node for Payload CMS that auto-discovers collections and operations",
   "main": "dist/index.js",
   "author": "Leadership Institute",
