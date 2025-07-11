@@ -33,24 +33,12 @@ _Built with [Cline](https://github.com/cline/cline) & Anthropic Claude API_
 1. In n8n, create new credentials of type "Payload CMS API"
 2. Configure the following fields:
    - **Base URL**: The base URL of your Payload CMS instance (e.g., `https://your-payload-instance.com`)
-   - **Authentication Method**: Choose between "Username & Password" or "API Key"
+   - **Email**: Your PayloadCMS user email
+   - **Password**: Your PayloadCMS user password
+   - **User Collection**: The collection slug for users (default: `users`)
    - **API Prefix**: The API route prefix (default: `/api`)
 
-#### Username & Password Authentication (Recommended)
-
-- **Email**: Your PayloadCMS user email
-- **Password**: Your PayloadCMS user password
-- **User Collection**: The collection slug for users (default: `users`)
-
-This method automatically handles login and token management in the background.
-
-#### API Key Authentication
-
-- **API Key**: Your Payload CMS API key
-
 ### Getting Credentials
-
-#### For Username & Password:
 
 Use any valid user account from your PayloadCMS instance. The node will automatically:
 
@@ -59,12 +47,7 @@ Use any valid user account from your PayloadCMS instance. The node will automati
 - Refresh tokens as needed
 - Handle session management transparently
 
-#### For API Key:
-
-1. Log into your Payload CMS admin panel
-2. Navigate to the API Keys section (usually under Settings or Users)
-3. Create a new API key with appropriate permissions
-4. Copy the generated key and use it in the n8n credentials
+No API keys are required - the node uses PayloadCMS's standard login authentication flow.
 
 ## Usage
 
@@ -252,6 +235,13 @@ For issues and questions:
 3. Open an issue in this repository
 
 ## Changelog
+
+### v1.2.0
+
+- **Simplified Authentication**: Removed API key authentication, now uses username/password only
+- **Cleaner Interface**: Simplified credentials configuration with fewer options
+- **Focused on PayloadCMS Standards**: Aligned with PayloadCMS's primary authentication method
+- **Reduced Complexity**: Streamlined codebase by removing unused authentication paths
 
 ### v1.1.0
 

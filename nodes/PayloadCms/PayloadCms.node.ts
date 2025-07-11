@@ -514,18 +514,18 @@ export class PayloadCms implements INodeType {
   ): Promise<PayloadCollection[]> {
     const credentials = await this.getCredentials("payloadCmsApi");
     const baseUrl = credentials.baseUrl as string;
-    const apiKey = credentials.apiKey as string;
     const apiPrefix = (credentials.apiPrefix as string) || "/api";
 
     try {
       // First, try to get collections from a potential admin endpoint
       // This is a common pattern in many CMS systems
-      const response = await axios.get(`${baseUrl}${apiPrefix}/collections`, {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await PayloadCms.prototype.makeAuthenticatedRequest.call(
+        this,
+        {
+          method: "GET",
+          url: `${baseUrl}${apiPrefix}/collections`,
+        }
+      );
 
       if (response.data && Array.isArray(response.data)) {
         return response.data;
@@ -548,11 +548,10 @@ export class PayloadCms implements INodeType {
 
     for (const slug of commonCollections) {
       try {
-        await axios.get(`${baseUrl}${apiPrefix}/${slug}?limit=1`, {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
+        await PayloadCms.prototype.makeAuthenticatedRequest.call(this, {
+          method: "GET",
+          url: `${baseUrl}${apiPrefix}/${slug}`,
+          params: { limit: 1 },
         });
 
         discoveredCollections.push({
@@ -569,7 +568,7 @@ export class PayloadCms implements INodeType {
 
     if (discoveredCollections.length === 0) {
       throw new Error(
-        "Could not discover any collections. Please ensure your Payload CMS instance is accessible and you have the correct API key."
+        "Could not discover any collections. Please ensure your Payload CMS instance is accessible and you have valid credentials."
       );
     }
 
@@ -579,17 +578,17 @@ export class PayloadCms implements INodeType {
   async discoverGlobals(this: ILoadOptionsFunctions): Promise<PayloadGlobal[]> {
     const credentials = await this.getCredentials("payloadCmsApi");
     const baseUrl = credentials.baseUrl as string;
-    const apiKey = credentials.apiKey as string;
     const apiPrefix = (credentials.apiPrefix as string) || "/api";
 
     try {
       // Try to get globals from a potential admin endpoint
-      const response = await axios.get(`${baseUrl}${apiPrefix}/globals`, {
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await PayloadCms.prototype.makeAuthenticatedRequest.call(
+        this,
+        {
+          method: "GET",
+          url: `${baseUrl}${apiPrefix}/globals`,
+        }
+      );
 
       if (response.data && Array.isArray(response.data)) {
         return response.data;
@@ -610,11 +609,9 @@ export class PayloadCms implements INodeType {
 
     for (const slug of commonGlobals) {
       try {
-        await axios.get(`${baseUrl}${apiPrefix}/globals/${slug}`, {
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
+        await PayloadCms.prototype.makeAuthenticatedRequest.call(this, {
+          method: "GET",
+          url: `${baseUrl}${apiPrefix}/globals/${slug}`,
         });
 
         discoveredGlobals.push({
@@ -636,14 +633,6 @@ export class PayloadCms implements INodeType {
   ): Promise<string> {
     const baseUrl = credentials.baseUrl as string;
     const apiPrefix = (credentials.apiPrefix as string) || "/api";
-    const authMethod = credentials.authMethod as string;
-
-    // If using API key method, return the API key directly
-    if (authMethod === "apiKey") {
-      return credentials.apiKey as string;
-    }
-
-    // For username/password authentication
     const email = credentials.email as string;
     const password = credentials.password as string;
     const userCollection = (credentials.userCollection as string) || "users";
@@ -728,7 +717,6 @@ export class PayloadCms implements INodeType {
 
         const credentials = await this.getCredentials("payloadCmsApi");
         const baseUrl = credentials.baseUrl as string;
-        const apiKey = credentials.apiKey as string;
         const apiPrefix = (credentials.apiPrefix as string) || "/api";
 
         let url = "";
