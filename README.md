@@ -33,12 +33,33 @@ _Built with [Cline](https://github.com/cline/cline) & Anthropic Claude API_
 1. In n8n, create new credentials of type "Payload CMS API"
 2. Configure the following fields:
    - **Base URL**: The base URL of your Payload CMS instance (e.g., `https://your-payload-instance.com`)
-   - **API Key**: Your Payload CMS API key
+   - **Authentication Method**: Choose between "Username & Password" or "API Key"
    - **API Prefix**: The API route prefix (default: `/api`)
 
-### Getting API Key
+#### Username & Password Authentication (Recommended)
 
-To get an API key from your Payload CMS instance:
+- **Email**: Your PayloadCMS user email
+- **Password**: Your PayloadCMS user password
+- **User Collection**: The collection slug for users (default: `users`)
+
+This method automatically handles login and token management in the background.
+
+#### API Key Authentication
+
+- **API Key**: Your Payload CMS API key
+
+### Getting Credentials
+
+#### For Username & Password:
+
+Use any valid user account from your PayloadCMS instance. The node will automatically:
+
+- Login when first used
+- Cache the authentication token for 1 hour
+- Refresh tokens as needed
+- Handle session management transparently
+
+#### For API Key:
 
 1. Log into your Payload CMS admin panel
 2. Navigate to the API Keys section (usually under Settings or Users)
@@ -231,6 +252,14 @@ For issues and questions:
 3. Open an issue in this repository
 
 ## Changelog
+
+### v1.1.0
+
+- **Automatic Authentication**: Added support for username/password authentication with automatic login
+- **Token Caching**: Implemented 1-hour token caching for improved performance
+- **Session Management**: Automatic token refresh and session handling
+- **Backward Compatibility**: Maintained support for API key authentication
+- **Enhanced Credentials**: New authentication method selection in credentials configuration
 
 ### v1.0.0
 
