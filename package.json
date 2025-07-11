@@ -1,0 +1,61 @@
+{
+  "name": "n8n-nodes-payload-dynamic",
+  "version": "1.0.0",
+  "description": "Dynamic n8n node for Payload CMS that auto-discovers collections and operations",
+  "main": "dist/index.js",
+  "author": "Leadership Institute",
+  "license": "MIT",
+  "homepage": "https://github.com/leadership-institute/n8n-payload-dynamic#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/leadership-institute/n8n-payload-dynamic.git"
+  },
+  "bugs": {
+    "url": "https://github.com/leadership-institute/n8n-payload-dynamic/issues"
+  },
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "format": "prettier --write .",
+    "lint": "eslint .",
+    "test": "jest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "n8n",
+    "n8n-community-node",
+    "n8n-node",
+    "payload",
+    "payloadcms",
+    "cms",
+    "headless-cms",
+    "rest-api",
+    "automation",
+    "workflow"
+  ],
+  "n8n": {
+    "nodes": [
+      "dist/nodes/PayloadCms/PayloadCms.node.js"
+    ],
+    "credentials": [
+      "dist/credentials/PayloadCmsApi.credentials.js"
+    ]
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "n8n-core": "^1.0.0",
+    "n8n-workflow": "^1.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.10.0"
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "name": "Payload CMS Example Workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "f6b4c5d0-1234-5678-9abc-def012345678",
+      "name": "When clicking 'Test workflow'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "resource": "collection",
+        "collection": "posts",
+        "operation": "find",
+        "additionalOptions": {
+          "limit": 5,
+          "sort": "-createdAt",
+          "where": {
+            "status": {
+              "equals": "published"
+            }
+          }
+        }
+      },
+      "id": "a1b2c3d4-5678-9abc-def0-123456789abc",
+      "name": "Get Published Posts",
+      "type": "n8n-nodes-payload-dynamic.payloadCms",
+      "typeVersion": 1,
+      "position": [460, 300],
+      "credentials": {
+        "payloadCmsApi": {
+          "id": "1",
+          "name": "Payload CMS API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "collection",
+        "collection": "posts",
+        "operation": "create",
+        "data": "{\n  \"title\": \"New Post from n8n\",\n  \"content\": \"This post was created automatically via n8n workflow\",\n  \"status\": \"draft\",\n  \"author\": \"n8n-automation\"\n}"
+      },
+      "id": "b2c3d4e5-6789-abcd-ef01-23456789abcd",
+      "name": "Create New Post",
+      "type": "n8n-nodes-payload-dynamic.payloadCms",
+      "typeVersion": 1,
+      "position": [680, 300],
+      "credentials": {
+        "payloadCmsApi": {
+          "id": "1",
+          "name": "Payload CMS API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "global",
+        "global": "settings",
+        "operation": "get"
+      },
+      "id": "c3d4e5f6-789a-bcde-f012-3456789abcde",
+      "name": "Get Site Settings",
+      "type": "n8n-nodes-payload-dynamic.payloadCms",
+      "typeVersion": 1,
+      "position": [460, 480],
+      "credentials": {
+        "payloadCmsApi": {
+          "id": "1",
+          "name": "Payload CMS API"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking 'Test workflow'": {
+      "main": [
+        [
+          {
+            "node": "Get Published Posts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Site Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Published Posts": {
+      "main": [
+        [
+          {
+            "node": "Create New Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "12345678-1234-5678-9abc-def012345678"
+}
