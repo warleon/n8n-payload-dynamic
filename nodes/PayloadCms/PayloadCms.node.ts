@@ -9,11 +9,14 @@ import {
   NodeConnectionType,
 } from "n8n-workflow";
 import axios, { AxiosRequestConfig } from "axios";
-import { PayloadCollection, PayloadGlobal } from "./payload.types";
+import {
+  PayloadCollectionPermissions,
+  PayloadGlobalPermissions,
+} from "./payload.types";
 
 interface PayloadDiscoveryResponse {
-  collections: PayloadCollection[];
-  globals: PayloadGlobal[];
+  collections: PayloadCollectionPermissions[];
+  globals: PayloadGlobalPermissions[];
 }
 
 export class PayloadCms implements INodeType {
@@ -428,10 +431,12 @@ export class PayloadCms implements INodeType {
         try {
           const collections =
             await PayloadCms.prototype.discoverCollections.call(this);
-          return collections.map((collection: PayloadCollection) => ({
-            name: collection.labels?.plural || collection.slug,
-            value: collection.slug,
-          }));
+          return collections.map(
+            (collection: PayloadCollectionPermissions) => ({
+              name: collection.labels?.plural || collection.slug,
+              value: collection.slug,
+            })
+          );
         } catch (error) {
           throw new NodeOperationError(
             this.getNode(),
@@ -447,7 +452,7 @@ export class PayloadCms implements INodeType {
       ): Promise<INodePropertyOptions[]> {
         try {
           const globals = await PayloadCms.prototype.discoverGlobals.call(this);
-          return globals.map((global: PayloadGlobal) => ({
+          return globals.map((global: PayloadGlobalPermissions) => ({
             name: global.label || global.slug,
             value: global.slug,
           }));
@@ -469,15 +474,17 @@ export class PayloadCms implements INodeType {
             await PayloadCms.prototype.discoverCollections.call(this);
           // Filter for auth-enabled collections or return common auth collections
           const authCollections = collections.filter(
-            (collection: PayloadCollection) =>
+            (collection: PayloadCollectionPermissions) =>
               collection.auth || collection.slug === "users"
           );
 
           if (authCollections.length > 0) {
-            return authCollections.map((collection: PayloadCollection) => ({
-              name: collection.labels?.plural || collection.slug,
-              value: collection.slug,
-            }));
+            return authCollections.map(
+              (collection: PayloadCollectionPermissions) => ({
+                name: collection.labels?.plural || collection.slug,
+                value: collection.slug,
+              })
+            );
           }
 
           // Fallback to common auth collection names
@@ -496,7 +503,7 @@ export class PayloadCms implements INodeType {
 
   async discoverCollections(
     this: ILoadOptionsFunctions
-  ): Promise<PayloadCollection[]> {
+  ): Promise<PayloadCollectionPermissions[]> {
     const credentials = await this.getCredentials("payloadCmsApi");
     const baseUrl = credentials.baseUrl as string;
     const permissionsEndpoint =
@@ -522,7 +529,9 @@ export class PayloadCms implements INodeType {
     }
   }
 
-  async discoverGlobals(this: ILoadOptionsFunctions): Promise<PayloadGlobal[]> {
+  async discoverGlobals(
+    this: ILoadOptionsFunctions
+  ): Promise<PayloadGlobalPermissions[]> {
     const credentials = await this.getCredentials("payloadCmsApi");
     const baseUrl = credentials.baseUrl as string;
     const permissionsEndpoint =
