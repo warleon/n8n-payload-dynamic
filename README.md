@@ -2,7 +2,7 @@
 
 A dynamic n8n node for Payload CMS that automatically discovers collections and operations, allowing you to interact with any Payload CMS instance via the REST API.
 
-_Built with [Cline](https://github.com/cline/cline) & Anthropic Claude API_
+_Forked from [n8n-payload-dynamic](https://github.com/leadership-institute/n8n-payload-dynamic)_
 
 ## Features
 
@@ -14,6 +14,22 @@ _Built with [Cline](https://github.com/cline/cline) & Anthropic Claude API_
 - **Error Handling**: Robust error handling with detailed error messages
 
 ## Installation
+
+### Automatic
+
+1. In your n8n instance go to "Settings"
+1. Then go to "Comunity nodes" and click the install button
+1. paste the following into the "npm Package Name" field
+
+> > ```
+> > @warleon/n8n-nodes-payload-cms
+> > ```
+
+4. Accept the checkpbox and click install
+
+![install](/media/install.png)
+
+### Manual
 
 1. Clone or download this repository
 2. Install dependencies:
