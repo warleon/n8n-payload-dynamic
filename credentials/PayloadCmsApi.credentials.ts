@@ -7,7 +7,7 @@ import {
 export class PayloadCmsApi implements ICredentialType {
   name = "payloadCmsApi";
   displayName = "Payload CMS API";
-  documentationUrl = "https://payloadcms.com/docs/rest-api/overview";
+  documentationUrl = "https://github.com/warleon/n8n-payload-dynamic#readme";
   properties: INodeProperties[] = [
     {
       displayName: "Base URL",
@@ -20,12 +20,19 @@ export class PayloadCmsApi implements ICredentialType {
     },
     {
       displayName: "API key",
-      name: "api key",
+      name: "apiKey",
       type: "string",
       default: "",
       description:
         "Your generated api key for the user you want to interface as",
       required: true,
+    },
+    {
+      displayName: "User Collection",
+      name: "userCollection",
+      type: "string",
+      default: "users",
+      description: "The collection slug for users (default: users)",
     },
     {
       displayName: "API Prefix",
@@ -36,6 +43,14 @@ export class PayloadCmsApi implements ICredentialType {
     },
   ];
   test: ICredentialTestRequest = {
-    request: {},
+    request: {
+      baseURL: "={{$credentials.baseUrl}}", // comes from user input
+      url: "/{{$credentials.apiPrefix}}/permissions",
+      method: "GET",
+      headers: {
+        Authorization:
+          "{{$credentials.userCollection}} API-Key {{$credentials.apiKey}}",
+      },
+    },
   };
 }
