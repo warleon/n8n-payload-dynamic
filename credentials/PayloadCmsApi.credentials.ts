@@ -41,6 +41,14 @@ export class PayloadCmsApi implements ICredentialType {
       default: "/api",
       description: "The API route prefix (default: /api)",
     },
+    {
+      displayName: "Permissions endpoint",
+      name: "permissionsEndpoint",
+      type: "string",
+      default: "/api/permissions",
+      description:
+        "The API route to the permissions endpoint as described in https://github.com/warleon/n8n-payload-dynamic?tab=readme-ov-file#payload",
+    },
   ];
   test: ICredentialTestRequest = {
     request: {
