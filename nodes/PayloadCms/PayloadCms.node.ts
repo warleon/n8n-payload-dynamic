@@ -626,75 +626,21 @@ export class PayloadCms implements INodeType {
     return discoveredGlobals;
   }
 
-  // Helper method to authenticate and get token
-  async authenticate(
-    this: IExecuteFunctions | ILoadOptionsFunctions,
-    credentials: any
-  ): Promise<string> {
-    const baseUrl = credentials.baseUrl as string;
-    const apiPrefix = (credentials.apiPrefix as string) || "/api";
-    const email = credentials.email as string;
-    const password = credentials.password as string;
-    const userCollection = (credentials.userCollection as string) || "users";
-
-    // Create cache key
-    const cacheKey = `${baseUrl}:${email}:${userCollection}`;
-
-    // Check if we have a valid cached token
-    const cached = PayloadCms.authTokenCache.get(cacheKey);
-    if (cached && cached.expires > Date.now()) {
-      return cached.token;
-    }
-
-    try {
-      // Login to get token
-      const loginResponse = await axios.post(
-        `${baseUrl}${apiPrefix}/${userCollection}/login`,
-        {
-          email,
-          password,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (loginResponse.data && loginResponse.data.token) {
-        const token = loginResponse.data.token;
-        // Cache token for 1 hour (adjust as needed)
-        const expires = Date.now() + 60 * 60 * 1000;
-        PayloadCms.authTokenCache.set(cacheKey, { token, expires });
-        return token;
-      }
-
-      throw new Error("No token received from login response");
-    } catch (error) {
-      throw new NodeOperationError(
-        this.getNode(),
-        `Authentication failed: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`
-      );
-    }
-  }
-
   // Helper method to make authenticated requests
   async makeAuthenticatedRequest(
     this: IExecuteFunctions | ILoadOptionsFunctions,
     config: AxiosRequestConfig
   ): Promise<any> {
     const credentials = await this.getCredentials("payloadCmsApi");
-    const token = await PayloadCms.prototype.authenticate.call(
-      this,
-      credentials
-    );
+    const baseUrl = credentials.baseUrl as string;
+    const apiPrefix = (credentials.apiPrefix as string) || "/api";
+    const apiKey = credentials.apiKey as string;
+    const userCollection = credentials.userCollection as string;
 
     // Add authorization header
     config.headers = {
       ...config.headers,
-      Authorization: `Bearer ${token}`,
+      Authorization: `${userCollection} API-Key ${apiKey}`,
       "Content-Type": "application/json",
     };
 
