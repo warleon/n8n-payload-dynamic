@@ -9,22 +9,7 @@ import {
   NodeConnectionType,
 } from "n8n-workflow";
 import axios, { AxiosRequestConfig } from "axios";
-
-interface PayloadCollection {
-  slug: string;
-  labels?: {
-    singular: string;
-    plural: string;
-  };
-  fields?: any[];
-  auth?: boolean;
-}
-
-interface PayloadGlobal {
-  slug: string;
-  label?: string;
-  fields?: any[];
-}
+import { PayloadCollection, PayloadGlobal } from "./payload.types";
 
 interface PayloadDiscoveryResponse {
   collections: PayloadCollection[];
@@ -514,116 +499,50 @@ export class PayloadCms implements INodeType {
   ): Promise<PayloadCollection[]> {
     const credentials = await this.getCredentials("payloadCmsApi");
     const baseUrl = credentials.baseUrl as string;
-    const apiPrefix = (credentials.apiPrefix as string) || "/api";
+    const permissionsEndpoint =
+      (credentials.permissionsEndpoint as string) || "/api/permissions";
 
     try {
       // First, try to get collections from a potential admin endpoint
       // This is a common pattern in many CMS systems
-      const response = await PayloadCms.prototype.makeAuthenticatedRequest.call(
-        this,
-        {
+      const response: PayloadDiscoveryResponse =
+        await PayloadCms.prototype.makeAuthenticatedRequest.call(this, {
           method: "GET",
-          url: `${baseUrl}${apiPrefix}/collections`,
-        }
-      );
-
-      if (response.data && Array.isArray(response.data)) {
-        return response.data;
-      }
+          url: `${baseUrl}${permissionsEndpoint}`,
+        });
+      return response.collections;
     } catch (error) {
       // If that fails, we'll try some common collection names
       // This is a fallback approach for discovery
-    }
 
-    // Fallback: Try some common collection names
-    const commonCollections = [
-      "users",
-      "posts",
-      "pages",
-      "media",
-      "categories",
-      "tags",
-    ];
-    const discoveredCollections: PayloadCollection[] = [];
-
-    for (const slug of commonCollections) {
-      try {
-        await PayloadCms.prototype.makeAuthenticatedRequest.call(this, {
-          method: "GET",
-          url: `${baseUrl}${apiPrefix}/${slug}`,
-          params: { limit: 1 },
-        });
-
-        discoveredCollections.push({
-          slug,
-          labels: {
-            singular: slug.slice(0, -1),
-            plural: slug,
-          },
-        });
-      } catch (error) {
-        // Collection doesn't exist, continue
-      }
-    }
-
-    if (discoveredCollections.length === 0) {
-      throw new Error(
-        "Could not discover any collections. Please ensure your Payload CMS instance is accessible and you have valid credentials."
+      throw new NodeOperationError(
+        this.getNode(),
+        `Failed to load collections ensure that ${baseUrl}${permissionsEndpoint} exists. check https://github.com/warleon/n8n-payload-dynamic?tab=readme-ov-file#payload`
       );
     }
-
-    return discoveredCollections;
   }
 
   async discoverGlobals(this: ILoadOptionsFunctions): Promise<PayloadGlobal[]> {
     const credentials = await this.getCredentials("payloadCmsApi");
     const baseUrl = credentials.baseUrl as string;
-    const apiPrefix = (credentials.apiPrefix as string) || "/api";
+    const permissionsEndpoint =
+      (credentials.permissionsEndpoint as string) || "/api";
 
     try {
       // Try to get globals from a potential admin endpoint
-      const response = await PayloadCms.prototype.makeAuthenticatedRequest.call(
-        this,
-        {
-          method: "GET",
-          url: `${baseUrl}${apiPrefix}/globals`,
-        }
-      );
-
-      if (response.data && Array.isArray(response.data)) {
-        return response.data;
-      }
-    } catch (error) {
-      // If that fails, we'll try some common global names
-    }
-
-    // Fallback: Try some common global names
-    const commonGlobals = [
-      "settings",
-      "config",
-      "navigation",
-      "footer",
-      "header",
-    ];
-    const discoveredGlobals: PayloadGlobal[] = [];
-
-    for (const slug of commonGlobals) {
-      try {
+      const response: PayloadDiscoveryResponse =
         await PayloadCms.prototype.makeAuthenticatedRequest.call(this, {
           method: "GET",
-          url: `${baseUrl}${apiPrefix}/globals/${slug}`,
+          url: `${baseUrl}${permissionsEndpoint}`,
         });
-
-        discoveredGlobals.push({
-          slug,
-          label: slug.charAt(0).toUpperCase() + slug.slice(1),
-        });
-      } catch (error) {
-        // Global doesn't exist, continue
-      }
+      return response.globals;
+    } catch (error) {
+      // If that fails, we'll try some common global names
+      throw new NodeOperationError(
+        this.getNode(),
+        `Failed to load globals ensure that ${baseUrl}${permissionsEndpoint} exists. check https://github.com/warleon/n8n-payload-dynamic?tab=readme-ov-file#payload`
+      );
     }
-
-    return discoveredGlobals;
   }
 
   // Helper method to make authenticated requests
