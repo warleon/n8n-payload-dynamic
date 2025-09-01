@@ -15,7 +15,43 @@ _Forked from [n8n-payload-dynamic](https://github.com/leadership-institute/n8n-p
 
 ## Installation
 
-### Automatic
+### Payload
+
+In your payload server create one endpoint to fetch the permissions for your user
+
+#### src/endpoints/permissions.ts
+
+```typescript
+import type { Endpoint, PayloadRequest } from "payload";
+
+export const permissionsEndpoint: Endpoint = {
+  path: "/permissions",
+  method: "get",
+  handler: async (req: PayloadRequest) => {
+    const { payload } = req;
+    const { permissions } = await payload.auth({ req, headers: req.headers });
+
+    const collections = permissions.collections;
+    const globals = permissions.globals;
+
+    return Response.json({ collections, globals });
+  },
+};
+```
+
+#### src/payload.config.ts
+
+```typescript
+import { buildConfig } from "payload/config";
+import { permissionsEndpoint } from "./endpoints"; // import the endpoint
+
+export default buildConfig({
+  // your collections, globals, etc
+  endpoints: [permissionsEndpoint], // add the endpoint
+});
+```
+
+### n8n
 
 1. In your n8n instance go to "Settings"
 1. Then go to "Comunity nodes" and click the install button
@@ -28,19 +64,6 @@ _Forked from [n8n-payload-dynamic](https://github.com/leadership-institute/n8n-p
 4. Accept the checkpbox and click install
 
 ![install](/media/install.png)
-
-### Manual
-
-1. Clone or download this repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Build the node:
-   ```bash
-   npm run build
-   ```
-4. Install the node in your n8n instance by copying the built files to your n8n custom nodes directory
 
 ## Configuration
 
