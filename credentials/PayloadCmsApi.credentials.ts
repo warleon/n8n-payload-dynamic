@@ -1,4 +1,8 @@
-import { ICredentialType, INodeProperties } from "n8n-workflow";
+import {
+  ICredentialTestRequest,
+  ICredentialType,
+  INodeProperties,
+} from "n8n-workflow";
 
 export class PayloadCmsApi implements ICredentialType {
   name = "payloadCmsApi";
@@ -9,36 +13,19 @@ export class PayloadCmsApi implements ICredentialType {
       displayName: "Base URL",
       name: "baseUrl",
       type: "string",
-      default: "https://your-payload-instance.com",
+      default: "",
       placeholder: "https://your-payload-instance.com",
       description: "The base URL of your Payload CMS instance",
       required: true,
     },
     {
-      displayName: "Email",
-      name: "email",
+      displayName: "API key",
+      name: "api key",
       type: "string",
       default: "",
-      description: "Your PayloadCMS user email",
+      description:
+        "Your generated api key for the user you want to interface as",
       required: true,
-    },
-    {
-      displayName: "Password",
-      name: "password",
-      type: "string",
-      typeOptions: {
-        password: true,
-      },
-      default: "",
-      description: "Your PayloadCMS user password",
-      required: true,
-    },
-    {
-      displayName: "User Collection",
-      name: "userCollection",
-      type: "string",
-      default: "users",
-      description: "The collection slug for users (default: users)",
     },
     {
       displayName: "API Prefix",
@@ -48,4 +35,7 @@ export class PayloadCmsApi implements ICredentialType {
       description: "The API route prefix (default: /api)",
     },
   ];
+  test: ICredentialTestRequest = {
+    request: {},
+  };
 }
