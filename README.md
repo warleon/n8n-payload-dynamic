@@ -72,8 +72,7 @@ export default buildConfig({
 1. In n8n, create new credentials of type "Payload CMS API"
 2. Configure the following fields:
    - **Base URL**: The base URL of your Payload CMS instance (e.g., `https://your-payload-instance.com`)
-   - **Email**: Your PayloadCMS user email
-   - **Password**: Your PayloadCMS user password
+   - **API key**: the generated api key for your user
    - **User Collection**: The collection slug for users (default: `users`)
    - **API Prefix**: The API route prefix (default: `/api`)
 
