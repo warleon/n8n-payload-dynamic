@@ -51,6 +51,18 @@ export class PayloadCmsApi implements ICredentialType {
     },
   ];
   test: ICredentialTestRequest = {
+    rules: [
+      {
+        type: "responseCode",
+        properties: {
+          value: 404,
+          message:
+            "Could not found {{$credentials.baseUrl}}/{{$credentials.endpoint}}",
+        },
+        errorMessage:
+          "Could not found {{$credentials.baseUrl}}/{{$credentials.endpoint}}",
+      },
+    ],
     request: {
       baseURL: "={{$credentials.baseUrl}}",
       url: "/{{$credentials.endpoint}}",
