@@ -1,6 +1,6 @@
 {
   "name": "@warleon/n8n-nodes-payload-cms",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "Dynamic n8n node for Payload CMS that auto-discovers collections and operations forked and extended from https://github.com/leadership-institute/n8n-payload-dynamic",
   "main": "dist/index.js",
   "author": "warleon",

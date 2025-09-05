@@ -57,7 +57,7 @@ export class PayloadCmsApi implements ICredentialType {
         properties: {
           value: 404,
           message:
-            "Could not found {{$credentials.baseUrl}}/{{$credentials.endpoint}}",
+            "Could not found {{$credentials.baseUrl}}{{$credentials.endpoint}}",
         },
         errorMessage:
           "Could not found {{$credentials.baseUrl}}/{{$credentials.endpoint}}",
@@ -65,7 +65,7 @@ export class PayloadCmsApi implements ICredentialType {
     ],
     request: {
       baseURL: "={{$credentials.baseUrl}}",
-      url: "/{{$credentials.endpoint}}",
+      url: "={{$credentials.endpoint}}",
       method: "GET",
       headers: {
         Authorization:
