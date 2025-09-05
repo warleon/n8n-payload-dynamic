@@ -8,7 +8,7 @@ import {
   NodeOperationError,
   NodeConnectionType,
 } from "n8n-workflow";
-import axios, { AxiosRequestConfig } from "axios";
+import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import {
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
@@ -335,12 +335,12 @@ export class PayloadCms implements INodeType {
     const reflectionEndpoint = credentials.endpoint as string;
 
     try {
-      const response: PayloadDiscoveryResponse =
+      const response: AxiosResponse<PayloadDiscoveryResponse> =
         await PayloadCms.prototype.makeAuthenticatedRequest.call(this, {
           method: "GET",
           url: `${baseUrl}${reflectionEndpoint}`,
         });
-      return response.collections;
+      return response.data.collections;
     } catch (error) {
       // If that fails, we'll try some common collection names
       // This is a fallback approach for discovery
@@ -361,12 +361,12 @@ export class PayloadCms implements INodeType {
 
     try {
       // Try to get globals from a potential admin endpoint
-      const response: PayloadDiscoveryResponse =
+      const response: AxiosResponse<PayloadDiscoveryResponse> =
         await PayloadCms.prototype.makeAuthenticatedRequest.call(this, {
           method: "GET",
           url: `${baseUrl}${reflectionEndpoint}`,
         });
-      return response.globals;
+      return response.data.globals;
     } catch (error) {
       // If that fails, we'll try some common global names
       throw new NodeOperationError(
