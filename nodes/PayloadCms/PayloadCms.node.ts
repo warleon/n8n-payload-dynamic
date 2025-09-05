@@ -62,10 +62,6 @@ export class PayloadCms implements INodeType {
             name: "Global",
             value: "global",
           },
-          {
-            name: "Auth",
-            value: "auth",
-          },
         ],
       },
       // Collection operations
@@ -226,141 +222,6 @@ export class PayloadCms implements INodeType {
         },
         description: "The data to send (JSON format)",
       },
-      // Auth operations
-      {
-        displayName: "Auth Collection",
-        name: "authCollection",
-        type: "options",
-        typeOptions: {
-          loadOptionsMethod: "getAuthCollections",
-        },
-        required: true,
-        default: "users",
-        displayOptions: {
-          show: {
-            resource: ["auth"],
-          },
-        },
-        description: "Choose the auth-enabled collection",
-      },
-      {
-        displayName: "Operation",
-        name: "operation",
-        type: "options",
-        noDataExpression: true,
-        required: true,
-        default: "login",
-        displayOptions: {
-          show: {
-            resource: ["auth"],
-          },
-        },
-        options: [
-          {
-            name: "Login",
-            value: "login",
-            description: "Login user",
-          },
-          {
-            name: "Logout",
-            value: "logout",
-            description: "Logout user",
-          },
-          {
-            name: "Me",
-            value: "me",
-            description: "Get current user",
-          },
-          {
-            name: "Refresh Token",
-            value: "refresh",
-            description: "Refresh authentication token",
-          },
-          {
-            name: "Forgot Password",
-            value: "forgotPassword",
-            description: "Send forgot password email",
-          },
-          {
-            name: "Reset Password",
-            value: "resetPassword",
-            description: "Reset user password",
-          },
-          {
-            name: "Verify",
-            value: "verify",
-            description: "Verify user account",
-          },
-          {
-            name: "Unlock",
-            value: "unlock",
-            description: "Unlock user account",
-          },
-        ],
-      },
-      // Auth data fields
-      {
-        displayName: "Email",
-        name: "email",
-        type: "string",
-        required: true,
-        default: "",
-        displayOptions: {
-          show: {
-            resource: ["auth"],
-            operation: ["login", "forgotPassword"],
-          },
-        },
-        description: "User email address",
-      },
-      {
-        displayName: "Password",
-        name: "password",
-        type: "string",
-        typeOptions: {
-          password: true,
-        },
-        required: true,
-        default: "",
-        displayOptions: {
-          show: {
-            resource: ["auth"],
-            operation: ["login"],
-          },
-        },
-        description: "User password",
-      },
-      {
-        displayName: "Token",
-        name: "token",
-        type: "string",
-        required: true,
-        default: "",
-        displayOptions: {
-          show: {
-            resource: ["auth"],
-            operation: ["verify", "resetPassword"],
-          },
-        },
-        description: "Verification or reset token",
-      },
-      {
-        displayName: "New Password",
-        name: "newPassword",
-        type: "string",
-        typeOptions: {
-          password: true,
-        },
-        required: true,
-        default: "",
-        displayOptions: {
-          show: {
-            resource: ["auth"],
-            operation: ["resetPassword"],
-          },
-        },
-        description: "New password for reset",
-      },
       // Query parameters
       {
         displayName: "Additional Options",
@@ -463,36 +324,6 @@ export class PayloadCms implements INodeType {
           );
         }
       },
-
-      async getAuthCollections(
-        this: ILoadOptionsFunctions
-      ): Promise<INodePropertyOptions[]> {
-        try {
-          const collections =
-            await PayloadCms.prototype.discoverCollections.call(this);
-          // Filter for auth-enabled collections or return common auth collections
-          const authCollections = collections.filter(
-            (collection) => collection.auth || collection.slug === "users"
-          );
-
-          if (authCollections.length > 0) {
-            return authCollections.map((collection) => ({
-              name: collection.labels?.plural || collection.slug,
-              value: collection.slug,
-            }));
-          }
-
-          // Fallback to common auth collection names
-          return [
-            { name: "Users", value: "users" },
-            { name: "Admins", value: "admins" },
-            { name: "Members", value: "members" },
-          ];
-        } catch (error) {
-          // Return default auth collections if discovery fails
-          return [{ name: "Users", value: "users" }];
-        }
-      },
     },
   };
 
@@ -501,16 +332,13 @@ export class PayloadCms implements INodeType {
   ): Promise<SanitizedCollectionConfig[]> {
     const credentials = await this.getCredentials("payloadCmsApi");
     const baseUrl = credentials.baseUrl as string;
-    const permissionsEndpoint =
-      (credentials.permissionsEndpoint as string) || "/api/permissions";
+    const reflectionEndpoint = credentials.endpoint as string;
 
     try {
-      // First, try to get collections from a potential admin endpoint
-      // This is a common pattern in many CMS systems
       const response: PayloadDiscoveryResponse =
         await PayloadCms.prototype.makeAuthenticatedRequest.call(this, {
           method: "GET",
-          url: `${baseUrl}${permissionsEndpoint}`,
+          url: `${baseUrl}${reflectionEndpoint}`,
         });
       return response.collections;
     } catch (error) {
@@ -519,7 +347,7 @@ export class PayloadCms implements INodeType {
 
       throw new NodeOperationError(
         this.getNode(),
-        `Failed to load collections ensure that ${baseUrl}${permissionsEndpoint} exists. check https://github.com/warleon/n8n-payload-dynamic?tab=readme-ov-file#payload`
+        `Failed to load collections ensure that ${baseUrl}${reflectionEndpoint} exists. check https://github.com/warleon/n8n-payload-dynamic?tab=readme-ov-file#payload`
       );
     }
   }
@@ -529,22 +357,21 @@ export class PayloadCms implements INodeType {
   ): Promise<SanitizedGlobalConfig[]> {
     const credentials = await this.getCredentials("payloadCmsApi");
     const baseUrl = credentials.baseUrl as string;
-    const permissionsEndpoint =
-      (credentials.permissionsEndpoint as string) || "/api";
+    const reflectionEndpoint = credentials.endpoint as string;
 
     try {
       // Try to get globals from a potential admin endpoint
       const response: PayloadDiscoveryResponse =
         await PayloadCms.prototype.makeAuthenticatedRequest.call(this, {
           method: "GET",
-          url: `${baseUrl}${permissionsEndpoint}`,
+          url: `${baseUrl}${reflectionEndpoint}`,
         });
       return response.globals;
     } catch (error) {
       // If that fails, we'll try some common global names
       throw new NodeOperationError(
         this.getNode(),
-        `Failed to load globals ensure that ${baseUrl}${permissionsEndpoint} exists. check https://github.com/warleon/n8n-payload-dynamic?tab=readme-ov-file#payload`
+        `Failed to load globals ensure that ${baseUrl}${reflectionEndpoint} exists. check https://github.com/warleon/n8n-payload-dynamic?tab=readme-ov-file#payload`
       );
     }
   }
@@ -555,15 +382,15 @@ export class PayloadCms implements INodeType {
     config: AxiosRequestConfig
   ): Promise<any> {
     const credentials = await this.getCredentials("payloadCmsApi");
-    const baseUrl = credentials.baseUrl as string;
-    const apiPrefix = (credentials.apiPrefix as string) || "/api";
     const apiKey = credentials.apiKey as string;
     const userCollection = credentials.userCollection as string;
+    const authToken = `${userCollection} API-Key ${apiKey}`;
+    //console.log("In Authenticated Request auth token:", authToken);
 
     // Add authorization header
     config.headers = {
       ...config.headers,
-      Authorization: `${userCollection} API-Key ${apiKey}`,
+      Authorization: authToken,
       "Content-Type": "application/json",
     };
 
@@ -676,61 +503,6 @@ export class PayloadCms implements INodeType {
               url = `${baseUrl}${apiPrefix}/globals/${global}`;
               method = "POST";
               data = this.getNodeParameter("data", i);
-              break;
-          }
-        } else if (resource === "auth") {
-          const authCollection = this.getNodeParameter(
-            "authCollection",
-            i
-          ) as string;
-
-          switch (operation) {
-            case "login":
-              url = `${baseUrl}${apiPrefix}/${authCollection}/login`;
-              method = "POST";
-              data = {
-                email: this.getNodeParameter("email", i),
-                password: this.getNodeParameter("password", i),
-              };
-              break;
-            case "logout":
-              url = `${baseUrl}${apiPrefix}/${authCollection}/logout`;
-              method = "POST";
-              break;
-            case "me":
-              url = `${baseUrl}${apiPrefix}/${authCollection}/me`;
-              method = "GET";
-              break;
-            case "refresh":
-              url = `${baseUrl}${apiPrefix}/${authCollection}/refresh-token`;
-              method = "POST";
-              break;
-            case "forgotPassword":
-              url = `${baseUrl}${apiPrefix}/${authCollection}/forgot-password`;
-              method = "POST";
-              data = {
-                email: this.getNodeParameter("email", i),
-              };
-              break;
-            case "resetPassword":
-              url = `${baseUrl}${apiPrefix}/${authCollection}/reset-password`;
-              method = "POST";
-              data = {
-                token: this.getNodeParameter("token", i),
-                password: this.getNodeParameter("newPassword", i),
-              };
-              break;
-            case "verify":
-              const token = this.getNodeParameter("token", i) as string;
-              url = `${baseUrl}${apiPrefix}/${authCollection}/verify/${token}`;
-              method = "POST";
-              break;
-            case "unlock":
-              url = `${baseUrl}${apiPrefix}/${authCollection}/unlock`;
-              method = "POST";
-              data = {
-                email: this.getNodeParameter("email", i),
-              };
               break;
           }
         }
