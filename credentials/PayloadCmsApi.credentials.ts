@@ -42,18 +42,18 @@ export class PayloadCmsApi implements ICredentialType {
       description: "The API route prefix (default: /api)",
     },
     {
-      displayName: "Permissions endpoint",
-      name: "permissionsEndpoint",
+      displayName: "Refection endpoint",
+      name: "endpoint",
       type: "string",
       default: "/api/permissions",
       description:
-        "The API route to the permissions endpoint as described in https://github.com/warleon/n8n-payload-dynamic?tab=readme-ov-file#payload",
+        "The API route to the reflection endpoint as described in https://github.com/warleon/n8n-payload-dynamic?tab=readme-ov-file#payload",
     },
   ];
   test: ICredentialTestRequest = {
     request: {
       baseURL: "={{$credentials.baseUrl}}", // comes from user input
-      url: "/{{$credentials.apiPrefix}}/permissions",
+      url: "/{{$credentials.apiPrefix}}/{{$credentials.endpoint}}",
       method: "GET",
       headers: {
         Authorization:

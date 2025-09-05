@@ -19,22 +19,21 @@ _Forked from [n8n-payload-dynamic](https://github.com/leadership-institute/n8n-p
 
 In your payload server create one endpoint to fetch the permissions for your user
 
-#### src/endpoints/permissions.ts
+#### src/endpoints/reflection.ts
 
 ```typescript
 import type { Endpoint, PayloadRequest } from "payload";
 
-export const permissionsEndpoint: Endpoint = {
-  path: "/permissions",
+export const reflectionEndpoint: Endpoint = {
+  path: "/reflection",
   method: "get",
   handler: async (req: PayloadRequest) => {
     const { payload } = req;
-    const { permissions } = await payload.auth({ req, headers: req.headers });
 
-    const collections = permissions.collections;
-    const globals = permissions.globals;
-
-    return Response.json({ collections, globals });
+    return Response.json({
+      collections: payload.config.collections,
+      globals: payload.config.globals,
+    });
   },
 };
 ```
@@ -43,11 +42,11 @@ export const permissionsEndpoint: Endpoint = {
 
 ```typescript
 import { buildConfig } from "payload/config";
-import { permissionsEndpoint } from "./endpoints"; // import the endpoint
+import { reflectionEndpoint } from "./endpoints"; // import the endpoint
 
 export default buildConfig({
   // your collections, globals, etc
-  endpoints: [permissionsEndpoint], // add the endpoint
+  endpoints: [reflectionEndpoint], // add the endpoint
 });
 ```
 
