@@ -45,15 +45,15 @@ export class PayloadCmsApi implements ICredentialType {
       displayName: "Refection endpoint",
       name: "endpoint",
       type: "string",
-      default: "/api/permissions",
+      default: "/api/reflection",
       description:
         "The API route to the reflection endpoint as described in https://github.com/warleon/n8n-payload-dynamic?tab=readme-ov-file#payload",
     },
   ];
   test: ICredentialTestRequest = {
     request: {
-      baseURL: "={{$credentials.baseUrl}}", // comes from user input
-      url: "/{{$credentials.apiPrefix}}/{{$credentials.endpoint}}",
+      baseURL: "={{$credentials.baseUrl}}",
+      url: "/{{$credentials.endpoint}}",
       method: "GET",
       headers: {
         Authorization:
