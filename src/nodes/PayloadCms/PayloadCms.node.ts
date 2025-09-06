@@ -522,36 +522,16 @@ export class PayloadCms implements INodeType {
         let requestConfig: AxiosRequestConfig = {};
         // handle binary inputs
         const binaryPropertyName = additionalOptions.upload;
-        returnData.push({
-          json: {
-            debug: `upload name: ${binaryPropertyName}`,
-          },
-        });
         if (binaryPropertyName) {
-          returnData.push({
-            json: {
-              debug: "entered file data, form-data path",
-            },
-          });
           const binaryData = this.helpers.assertBinaryData(
             i,
             binaryPropertyName
           );
-          returnData.push({
-            json: {
-              debug: `binarydata type: ${binaryData.mimeType}`,
-            },
-          });
 
           const fileBuffer = await this.helpers.getBinaryDataBuffer(
             i,
             binaryPropertyName
           );
-          returnData.push({
-            json: {
-              debug: `fileBuffer size: ${fileBuffer.length}`,
-            },
-          });
           const fileName = binaryData.fileName;
           const mimeType = binaryData.mimeType;
           const formData = new FormData();
@@ -559,20 +539,10 @@ export class PayloadCms implements INodeType {
             filename: fileName,
             contentType: mimeType,
           });
-          returnData.push({
-            json: {
-              debug: `formData append file: ${fileName}`,
-            },
-          });
           if (data) {
             const sanitizeData =
               typeof data === "string" ? JSON.parse(data) : data;
             formData.append("_payload", JSON.stringify(sanitizeData));
-            returnData.push({
-              json: {
-                debug: `formData append data: ${data}`,
-              },
-            });
           }
 
           requestConfig = {
@@ -587,11 +557,6 @@ export class PayloadCms implements INodeType {
             },
           };
         } else {
-          returnData.push({
-            json: {
-              debug: "entered normal data, json data path",
-            },
-          });
           requestConfig = {
             method: method as any,
             url,
