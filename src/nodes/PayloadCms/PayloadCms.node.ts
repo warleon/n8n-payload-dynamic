@@ -522,18 +522,18 @@ export class PayloadCms implements INodeType {
         let requestConfig: AxiosRequestConfig = {};
         // handle binary inputs
         const binaryPropertyName = this.getNodeParameter(
-          "upload",
-          0,
-          ""
+          "additionalOptions.upload",
+          i
         ) as string;
-        if (binaryPropertyName !== "") {
+
+        if (binaryPropertyName) {
           const binaryData = this.helpers.assertBinaryData(
-            0,
+            i,
             binaryPropertyName
           );
 
           const fileBuffer = await this.helpers.getBinaryDataBuffer(
-            0,
+            i,
             binaryPropertyName
           );
           const fileName = binaryData.fileName;
@@ -591,8 +591,8 @@ export class PayloadCms implements INodeType {
             const status = error.response.status;
             const data = error.response.data; // body from server
             // Log to n8n logs
-            this.logger.info(`Request failed with status ${status}`);
-            this.logger.info(`Response body: ${JSON.stringify(data)}`);
+            this.logger.error(`Request failed with status ${status}`);
+            this.logger.error(`Response body: ${JSON.stringify(data)}`);
             returnData.push({
               error: new NodeOperationError(this.getNode(), error),
               json: data,
