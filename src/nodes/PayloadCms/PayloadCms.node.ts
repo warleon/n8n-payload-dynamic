@@ -522,7 +522,17 @@ export class PayloadCms implements INodeType {
         let requestConfig: AxiosRequestConfig = {};
         // handle binary inputs
         const binaryPropertyName = additionalOptions.upload;
+        returnData.push({
+          json: {
+            debug: `upload name: ${binaryPropertyName}`,
+          },
+        });
         if (binaryPropertyName) {
+          returnData.push({
+            json: {
+              debug: "entered file data, form-data path",
+            },
+          });
           const binaryData = this.helpers.assertBinaryData(
             i,
             binaryPropertyName
@@ -556,6 +566,11 @@ export class PayloadCms implements INodeType {
             },
           };
         } else {
+          returnData.push({
+            json: {
+              debug: "entered normal data, json data path",
+            },
+          });
           requestConfig = {
             method: method as any,
             url,
