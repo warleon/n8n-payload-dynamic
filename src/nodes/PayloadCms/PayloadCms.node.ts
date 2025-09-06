@@ -551,9 +551,13 @@ export class PayloadCms implements INodeType {
 
           requestConfig = {
             method: method as any,
+            maxBodyLength: Infinity,
             url,
             params,
             data: formData,
+            headers: {
+              ...formData.getHeaders(),
+            },
           };
         } else {
           requestConfig = {
