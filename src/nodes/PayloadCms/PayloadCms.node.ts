@@ -521,11 +521,7 @@ export class PayloadCms implements INodeType {
 
         let requestConfig: AxiosRequestConfig = {};
         // handle binary inputs
-        const binaryPropertyName = this.getNodeParameter(
-          "additionalOptions.upload",
-          i
-        ) as string;
-
+        const binaryPropertyName = additionalOptions.upload;
         if (binaryPropertyName) {
           const binaryData = this.helpers.assertBinaryData(
             i,
