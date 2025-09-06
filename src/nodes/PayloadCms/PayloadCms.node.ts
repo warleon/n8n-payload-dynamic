@@ -8,11 +8,12 @@ import {
   NodeOperationError,
   NodeConnectionType,
 } from "n8n-workflow";
-import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import {
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
 } from "./payload.types";
+import FormData from "form-data";
 
 interface PayloadDiscoveryResponse {
   collections: SanitizedCollectionConfig[];
@@ -577,7 +578,21 @@ export class PayloadCms implements INodeType {
           },
         });
       } catch (error) {
-        console.error("PayloadCMS Error:", error);
+        if (error instanceof AxiosError) {
+          if (error.response) {
+            // HTTP error (400, 500, etc.)
+            const status = error.response.status;
+            const data = error.response.data; // body from server
+            // Log to n8n logs
+            this.logger.error(`Request failed with status ${status}`);
+            this.logger.error(`Response body: ${JSON.stringify(data)}`);
+            returnData.push({
+              error: new NodeOperationError(this.getNode(), error),
+              json: data,
+            });
+          }
+        }
+
         if (this.continueOnFail()) {
           returnData.push({
             json: {
