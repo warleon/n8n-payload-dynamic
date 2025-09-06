@@ -27,7 +27,8 @@
     "format": "prettier --write .",
     "lint": "eslint .",
     "test": "jest",
-    "prepublishOnly": "npm run build"
+    "prepublishOnly": "npm run build",
+    "postbuild": "copyfiles -u 1 \"src/**/*.svg\" dist/"
   },
   "keywords": [
     "n8n",
@@ -51,6 +52,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "copyfiles": "^2.4.1",
     "n8n-core": "^1.0.0",
     "n8n-workflow": "^1.0.0",
     "ts-essentials": "^10.1.1",
