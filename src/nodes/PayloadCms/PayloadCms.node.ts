@@ -535,7 +535,10 @@ export class PayloadCms implements INodeType {
           const fileName = binaryData.fileName;
           const mimeType = binaryData.mimeType;
           const formData = new FormData();
-          formData.append("file", fileBuffer, fileName);
+          formData.append("file", fileBuffer, {
+            filename: fileName,
+            contentType: mimeType,
+          } as unknown as string);
           if (data) {
             const sanitizeData =
               typeof data === "string" ? JSON.parse(data) : data;
@@ -574,6 +577,7 @@ export class PayloadCms implements INodeType {
           },
         });
       } catch (error) {
+        console.error("PayloadCMS Error:", error);
         if (this.continueOnFail()) {
           returnData.push({
             json: {
