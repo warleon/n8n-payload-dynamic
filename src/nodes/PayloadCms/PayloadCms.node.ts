@@ -398,9 +398,9 @@ export class PayloadCms implements INodeType {
 
     // Add authorization header
     config.headers = {
-      ...config.headers,
       Authorization: authToken,
       "Content-Type": "application/json",
+      ...config.headers,
     };
     config.validateStatus = (status) => {
       return status < 500;
@@ -537,22 +537,42 @@ export class PayloadCms implements INodeType {
             i,
             binaryPropertyName
           );
+          returnData.push({
+            json: {
+              debug: `binarydata type: ${binaryData.mimeType}`,
+            },
+          });
 
           const fileBuffer = await this.helpers.getBinaryDataBuffer(
             i,
             binaryPropertyName
           );
+          returnData.push({
+            json: {
+              debug: `fileBuffer size: ${fileBuffer.length}`,
+            },
+          });
           const fileName = binaryData.fileName;
           const mimeType = binaryData.mimeType;
           const formData = new FormData();
           formData.append("file", fileBuffer, {
             filename: fileName,
             contentType: mimeType,
-          } as unknown as string);
+          });
+          returnData.push({
+            json: {
+              debug: `formData append file: ${fileName}`,
+            },
+          });
           if (data) {
             const sanitizeData =
               typeof data === "string" ? JSON.parse(data) : data;
             formData.append("_payload", JSON.stringify(sanitizeData));
+            returnData.push({
+              json: {
+                debug: `formData append data: ${data}`,
+              },
+            });
           }
 
           requestConfig = {
@@ -563,6 +583,7 @@ export class PayloadCms implements INodeType {
             data: formData,
             headers: {
               ...formData.getHeaders(),
+              "Content-Type": "multipart/form-data",
             },
           };
         } else {
