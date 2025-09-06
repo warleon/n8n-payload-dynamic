@@ -402,6 +402,9 @@ export class PayloadCms implements INodeType {
       Authorization: authToken,
       "Content-Type": "application/json",
     };
+    config.validateStatus = (status) => {
+      return status < 500;
+    };
 
     return axios(config);
   }
@@ -584,8 +587,8 @@ export class PayloadCms implements INodeType {
             const status = error.response.status;
             const data = error.response.data; // body from server
             // Log to n8n logs
-            this.logger.error(`Request failed with status ${status}`);
-            this.logger.error(`Response body: ${JSON.stringify(data)}`);
+            this.logger.info(`Request failed with status ${status}`);
+            this.logger.info(`Response body: ${JSON.stringify(data)}`);
             returnData.push({
               error: new NodeOperationError(this.getNode(), error),
               json: data,
