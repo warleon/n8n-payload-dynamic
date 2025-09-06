@@ -279,6 +279,14 @@ export class PayloadCms implements INodeType {
             default: "",
             description: "Locale for localized content",
           },
+          {
+            displayName: "Upload",
+            name: "upload",
+            type: "string",
+            default: "data",
+            description:
+              "Name of the binary property that contains the file to upload",
+          },
         ],
       },
     ],
@@ -507,15 +515,50 @@ export class PayloadCms implements INodeType {
           }
         }
 
-        const requestConfig: AxiosRequestConfig = {
-          method: method as any,
-          url,
-          params,
-        };
+        let requestConfig: AxiosRequestConfig = {};
+        // handle binary inputs
+        const binaryPropertyName = this.getNodeParameter(
+          "upload",
+          0,
+          ""
+        ) as string;
+        if (binaryPropertyName !== "") {
+          const binaryData = this.helpers.assertBinaryData(
+            0,
+            binaryPropertyName
+          );
 
-        if (data) {
-          requestConfig.data =
-            typeof data === "string" ? JSON.parse(data) : data;
+          const fileBuffer = await this.helpers.getBinaryDataBuffer(
+            0,
+            binaryPropertyName
+          );
+          const fileName = binaryData.fileName;
+          const mimeType = binaryData.mimeType;
+          const formData = new FormData();
+          formData.append("file", fileBuffer, fileName);
+          if (data) {
+            const sanitizeData =
+              typeof data === "string" ? JSON.parse(data) : data;
+            formData.append("_payload", JSON.stringify(sanitizeData));
+          }
+
+          requestConfig = {
+            method: method as any,
+            url,
+            params,
+            data: formData,
+          };
+        } else {
+          requestConfig = {
+            method: method as any,
+            url,
+            params,
+          };
+
+          if (data) {
+            requestConfig.data =
+              typeof data === "string" ? JSON.parse(data) : data;
+          }
         }
 
         const response =
