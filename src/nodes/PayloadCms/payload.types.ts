@@ -142,3 +142,36 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
   fields: Field[];
   label?: StaticLabel;
 };
+
+export declare const validOperators: readonly [
+  "equals",
+  "contains",
+  "not_equals",
+  "in",
+  "all",
+  "not_in",
+  "exists",
+  "greater_than",
+  "greater_than_equal",
+  "less_than",
+  "less_than_equal",
+  "like",
+  "not_like",
+  "within",
+  "intersects",
+  "near"
+];
+export type Operator = (typeof validOperators)[number];
+export type JsonValue = JsonArray | JsonObject | unknown;
+export type JsonArray = Array<JsonValue>;
+export interface JsonObject {
+  [key: string]: any;
+}
+export type WhereField = {
+  [key in Operator]?: JsonValue;
+};
+export type Where = {
+  and?: Where[];
+  or?: Where[];
+  [key: string]: Where[] | WhereField | undefined;
+};

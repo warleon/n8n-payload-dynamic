@@ -14,6 +14,7 @@ import {
   SanitizedGlobalConfig,
 } from "./payload.types";
 import FormData from "form-data";
+import { stringify } from "qs-esm";
 
 interface PayloadDiscoveryResponse {
   collections: SanitizedCollectionConfig[];
@@ -452,7 +453,7 @@ export class PayloadCms implements INodeType {
             typeof additionalOptions.where === "string"
               ? JSON.parse(additionalOptions.where)
               : additionalOptions.where;
-          params.where = JSON.stringify(whereClause);
+          params.where = stringify(whereClause);
         }
         if (additionalOptions.select) params.select = additionalOptions.select;
         if (additionalOptions.locale) params.locale = additionalOptions.locale;
