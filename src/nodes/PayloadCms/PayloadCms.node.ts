@@ -412,6 +412,12 @@ export class PayloadCms implements INodeType {
   async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
     const items = this.getInputData();
     const returnData: INodeExecutionData[] = [];
+    const executionId = this.getExecutionId();
+    const metadata = {
+      __n8n_nodes_payload_cms__: {
+        executionId,
+      },
+    };
 
     for (let i = 0; i < items.length; i++) {
       try {
@@ -540,10 +546,12 @@ export class PayloadCms implements INodeType {
             contentType: mimeType,
           });
           if (data) {
-            const sanitizeData =
-              typeof data === "string" ? JSON.parse(data) : data;
-            formData.append("_payload", JSON.stringify(sanitizeData));
+            typeof data === "string" ? JSON.parse(data) : data;
+          } else {
+            data = {};
           }
+          const sanitizeData = { ...data, ...metadata };
+          formData.append("_payload", JSON.stringify(sanitizeData));
 
           requestConfig = {
             method: method as any,
@@ -564,9 +572,11 @@ export class PayloadCms implements INodeType {
           };
 
           if (data) {
-            requestConfig.data =
-              typeof data === "string" ? JSON.parse(data) : data;
+            data = typeof data === "string" ? JSON.parse(data) : data;
+          } else {
+            data = {};
           }
+          requestConfig.data = { ...data, ...metadata };
         }
 
         const response =
