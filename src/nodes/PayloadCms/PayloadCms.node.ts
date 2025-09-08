@@ -450,6 +450,9 @@ export class PayloadCms implements INodeType {
     config.validateStatus = (status) => {
       return status < 500;
     };
+    config.paramsSerializer = {
+      serialize: (params) => stringify(params, { arrayFormat: "brackets" }),
+    };
 
     return axios(config);
   }
@@ -497,7 +500,7 @@ export class PayloadCms implements INodeType {
             typeof additionalOptions.where === "string"
               ? JSON.parse(additionalOptions.where)
               : additionalOptions.where;
-          params.where = stringify(whereClause);
+          params.where = whereClause;
         }
         if (additionalOptions.select) params.select = additionalOptions.select;
         if (additionalOptions.locale) params.locale = additionalOptions.locale;
