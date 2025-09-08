@@ -591,7 +591,7 @@ export class PayloadCms implements INodeType {
             contentType: mimeType,
           });
           if (data) {
-            typeof data === "string" ? JSON.parse(data) : data;
+            data = typeof data === "string" ? JSON.parse(data) : data;
           } else {
             data = {};
           }
