@@ -1,14 +1,14 @@
 import type { DeepRequired } from "ts-essentials";
 
-export interface SanitizedGlobalConfig extends DeepRequired<GlobalConfig> {
-  fields: Field[];
+export interface SanitizedGlobalConfig extends GlobalConfig {
+  fields: PayloadField[];
   slug: GlobalSlug;
 }
 
 export interface SanitizedCollectionConfig
   extends DeepRequired<CollectionConfig> {
   auth: Auth;
-  fields: Field[];
+  fields: PayloadField[];
   slug: CollectionSlug;
 }
 
@@ -132,14 +132,12 @@ export interface IncomingAuthType {
    */
 }
 
-export type Field = any; //TODO copy the correct fields
-
 export type CollectionSlug = string;
 export type GlobalSlug = string;
 
-export type GlobalConfig<TSlug extends GlobalSlug = any> = {
+export type GlobalConfig = {
   custom?: Record<string, any>;
-  fields: Field[];
+  fields: PayloadField[];
   label?: StaticLabel;
 };
 
@@ -175,3 +173,72 @@ export type Where = {
   or?: Where[];
   [key: string]: Where[] | WhereField | undefined;
 };
+
+export type PayloadFieldType =
+  | "array"
+  | "blocks"
+  | "checkbox"
+  | "code"
+  | "collapsible"
+  | "date"
+  | "email"
+  | "group"
+  | "join"
+  | "json"
+  | "number"
+  | "point"
+  | "radio"
+  | "relationship"
+  | "richText"
+  | "row"
+  | "select"
+  | "tabs"
+  | "text"
+  | "textarea"
+  | "ui"
+  | "upload";
+
+export interface PayloadAdminConfig {
+  disableBulkEdit?: boolean;
+  hidden?: boolean;
+  disabled?: boolean;
+  components?: {
+    Field?: boolean;
+  };
+}
+
+export interface PayloadHooksConfig {
+  beforeValidate?: (null | unknown)[];
+  beforeChange?: (null | unknown)[];
+  afterRead?: (null | unknown)[];
+}
+
+export interface PayloadAccessConfig {
+  // You can refine if needed
+  [key: string]: unknown;
+}
+
+export interface PayloadField {
+  name: string;
+  type: PayloadFieldType;
+  required?: boolean;
+  unique?: boolean;
+  hidden?: boolean;
+  index?: boolean;
+  defaultValue?: unknown;
+  access?: PayloadAccessConfig;
+  admin?: PayloadAdminConfig;
+  hooks?: PayloadHooksConfig;
+
+  // for nested structures
+  fields?: PayloadField[];
+
+  // for select / radio fields
+  options?: Array<
+    | string
+    | {
+        label: string;
+        value: string | number;
+      }
+  >;
+}

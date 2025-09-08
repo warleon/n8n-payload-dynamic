@@ -10,11 +10,13 @@ import {
 } from "n8n-workflow";
 import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import {
+  PayloadField,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
 } from "./payload.types";
 import FormData from "form-data";
 import { stringify } from "qs-esm";
+import { payloadField2N8nOption } from "./utils";
 
 interface PayloadDiscoveryResponse {
   collections: SanitizedCollectionConfig[];
@@ -22,12 +24,11 @@ interface PayloadDiscoveryResponse {
 }
 
 export class PayloadCms implements INodeType {
-  // Cache for authentication tokens
-  private static authTokenCache = new Map<
+  private static collectionsCache = new Map<
     string,
-    { token: string; expires: number }
+    SanitizedCollectionConfig[]
   >();
-
+  private static globalsCache = new Map<string, SanitizedGlobalConfig[]>();
   description: INodeTypeDescription = {
     displayName: "Payload CMS",
     name: "payloadCms",
@@ -199,9 +200,12 @@ export class PayloadCms implements INodeType {
       {
         displayName: "Data",
         name: "data",
-        type: "json",
+        type: "multiOptions",
         required: true,
-        default: "{}",
+        default: "",
+        typeOptions: {
+          loadOptionsMethod: "getPayloadFields",
+        },
         displayOptions: {
           show: {
             resource: ["collection"],
@@ -302,6 +306,8 @@ export class PayloadCms implements INodeType {
         try {
           const collections =
             await PayloadCms.prototype.discoverCollections.call(this);
+
+          PayloadCms.collectionsCache.set(this.getInstanceId(), collections);
           return collections.map((collection) => ({
             name: collection.labels?.plural || collection.slug,
             value: collection.slug,
@@ -321,6 +327,7 @@ export class PayloadCms implements INodeType {
       ): Promise<INodePropertyOptions[]> {
         try {
           const globals = await PayloadCms.prototype.discoverGlobals.call(this);
+          PayloadCms.globalsCache.set(this.getInstanceId(), globals);
           return globals.map((global) => ({
             name: global.label || global.slug,
             value: global.slug,
@@ -332,6 +339,46 @@ export class PayloadCms implements INodeType {
               error instanceof Error ? error.message : "Unknown error"
             }`
           );
+        }
+      },
+      async getPayloadFields(
+        this: ILoadOptionsFunctions
+      ): Promise<INodePropertyOptions[]> {
+        const resource = this.getCurrentNodeParameter("resource");
+        switch (resource) {
+          case "collection":
+            const collectionSlug = this.getCurrentNodeParameter("collection");
+            const collection = PayloadCms.collectionsCache
+              .get(this.getInstanceId())
+              ?.find((c) => c.slug === collectionSlug);
+            if (!collection) {
+              throw new NodeOperationError(
+                this.getNode(),
+                `Failed to load fields for collection ${collectionSlug}: collection not found`
+              );
+            }
+            return collection.fields.flatMap((f) => payloadField2N8nOption(f));
+
+            break;
+          case "global":
+            const globalSlug = this.getCurrentNodeParameter("collection");
+            const global = PayloadCms.globalsCache
+              .get(this.getInstanceId())
+              ?.find((g) => g.slug === globalSlug);
+            if (!global) {
+              throw new NodeOperationError(
+                this.getNode(),
+                `Failed to load fields for global ${globalSlug}: global not found`
+              );
+            }
+            return global.fields.flatMap((f) => payloadField2N8nOption(f));
+            break;
+
+          default:
+            throw new NodeOperationError(
+              this.getNode(),
+              `Failed to load fields for resource ${resource}: resource not supported`
+            );
         }
       },
     },
@@ -551,7 +598,7 @@ export class PayloadCms implements INodeType {
           } else {
             data = {};
           }
-          const sanitizeData = { ...data, ...metadata };
+          const sanitizeData = { ...metadata, ...data };
           formData.append("_payload", JSON.stringify(sanitizeData));
 
           requestConfig = {
