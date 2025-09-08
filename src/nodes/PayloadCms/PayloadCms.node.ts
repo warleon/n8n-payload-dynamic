@@ -200,12 +200,9 @@ export class PayloadCms implements INodeType {
       {
         displayName: "Data",
         name: "data",
-        type: "multiOptions",
+        type: "json",
         required: true,
-        default: "",
-        typeOptions: {
-          loadOptionsMethod: "getPayloadFields",
-        },
+        default: "{}",
         displayOptions: {
           show: {
             resource: ["collection"],
